@@ -1,6 +1,6 @@
 @echo off
-REM This script provides a menu to either sync an existing Git repository
-REM or clone a new one using shallow history to save space.
+REM This script provides a menu to push, pull, or clone a Git repository
+REM using shallow history to save space.
 
 TITLE Git Sync & Clone Tool
 
@@ -14,22 +14,24 @@ echo =======================================================
 echo.
 echo What would you like to do?
 echo.
-echo   1. Sync this folder with GitHub
-echo   2. Clone a new repository from GitHub
-echo   3. Exit
+echo   1. Pull (Download latest changes from GitHub)
+echo   2. Push (Upload your local changes to GitHub)
+echo   3. Clone a new repository from GitHub
+echo   4. Exit
 echo.
 
-CHOICE /C 123 /M "Enter your choice: "
+CHOICE /C 1234 /M "Enter your choice: "
 
-IF ERRORLEVEL 3 GOTO end
-IF ERRORLEVEL 2 GOTO clone
-IF ERRORLEVEL 1 GOTO sync
+IF ERRORLEVEL 4 GOTO end
+IF ERRORLEVEL 3 GOTO clone
+IF ERRORLEVEL 2 GOTO push
+IF ERRORLEVEL 1 GOTO pull
 
-:sync
+:pull
 cls
 echo =======================================================
 echo.
-echo           Syncing Folder with GitHub
+echo       Downloading Changes from GitHub (Pull)
 echo.
 echo =======================================================
 echo.
@@ -37,42 +39,68 @@ echo.
 REM Check if the current directory is a Git repository before proceeding.
 IF NOT EXIST ".git" (
     echo [ERROR] This folder is not a Git repository.
-    echo You need to clone a repository before you can sync.
+    echo You need to clone a repository before you can pull.
     echo.
     pause
     GOTO menu
 )
 
-REM [1/5] Add all files in the current directory to the staging area.
-echo [1/5] Staging all files...
-git add .
-echo.
-
-REM [2/5] Commit the changes with the current date and time as the message.
-echo [2/5] Committing local changes...
-git commit -m "Sync: %date% %time%"
-echo.
-
-REM [3/5] Pulling latest changes from the remote repository.
-REM Using --depth=1 ensures we don't download the entire project history,
-REM keeping the local .git folder small.
-echo [3/5] Pulling latest changes from the server (shallow)...
+REM [1/2] Pull the latest changes from the remote repository.
+REM Using --depth=1 ensures we don't download the entire project history.
+echo [1/2] Pulling latest changes from the server (shallow)...
 git pull --depth=1 --rebase
 echo.
 
-REM [4/5] Push the committed changes to the remote repository.
-echo [4/5] Pushing your changes to the server...
-git push
-echo.
-
-REM [5/5] Run Git's garbage collection to clean up and optimize.
-echo [5/5] Performing repository maintenance...
+REM [2/2] Run Git's garbage collection to clean up and optimize.
+echo [2/2] Performing repository maintenance...
 git gc --prune=now --aggressive
 echo.
 
 echo =======================================================
 echo.
-echo           Sync and Optimize Complete!
+echo                Pull Complete!
+echo.
+echo =======================================================
+echo.
+pause
+GOTO menu
+
+:push
+cls
+echo =======================================================
+echo.
+echo         Uploading Changes to GitHub (Push)
+echo.
+echo =======================================================
+echo.
+
+REM Check if the current directory is a Git repository before proceeding.
+IF NOT EXIST ".git" (
+    echo [ERROR] This folder is not a Git repository.
+    echo You need to clone a repository before you can push.
+    echo.
+    pause
+    GOTO menu
+)
+
+REM [1/3] Add all files in the current directory to the staging area.
+echo [1/3] Staging all files...
+git add .
+echo.
+
+REM [2/3] Commit the changes with the current date and time as the message.
+echo [2/3] Committing local changes...
+git commit -m "Sync: %date% %time%"
+echo.
+
+REM [3/3] Push the committed changes to the remote repository.
+echo [3/3] Pushing your changes to the server...
+git push
+echo.
+
+echo =======================================================
+echo.
+echo                Push Complete!
 echo.
 echo =======================================================
 echo.
@@ -91,7 +119,7 @@ echo.
 REM First, check if this is already a git repository.
 IF EXIST ".git" (
     echo [ERROR] This folder is already a Git repository.
-    echo You should use the 'Sync' option instead of 'Clone'.
+    echo You should use a 'Pull' or 'Push' option instead.
     echo.
     pause
     GOTO menu
@@ -138,3 +166,4 @@ GOTO menu
 
 :end
 exit
+
