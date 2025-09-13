@@ -1,6 +1,6 @@
 @echo off
 REM This script provides a menu to either sync an existing Git repository
-REM or clone a new one.
+REM or clone a new one using shallow history to save space.
 
 TITLE Git Sync & Clone Tool
 
@@ -53,9 +53,11 @@ echo [2/5] Committing local changes...
 git commit -m "Sync: %date% %time%"
 echo.
 
-REM [3/5] Pull the latest changes from the remote repository.
-echo [3/5] Pulling latest changes from the server...
-git pull --rebase
+REM [3/5] Pulling latest changes from the remote repository.
+REM Using --depth=1 ensures we don't download the entire project history,
+REM keeping the local .git folder small.
+echo [3/5] Pulling latest changes from the server (shallow)...
+git pull --depth=1 --rebase
 echo.
 
 REM [4/5] Push the committed changes to the remote repository.
@@ -120,8 +122,9 @@ echo Cloning the mcpe-server repository into the current directory...
 echo %repo_url%
 echo.
 
-REM Execute the git clone command, cloning into the current directory (.).
-git clone %repo_url% .
+REM Execute a shallow git clone (--depth 1) to only download the latest commit,
+REM which significantly reduces the .git folder size.
+git clone --depth 1 %repo_url% .
 
 echo.
 echo =======================================================
@@ -135,4 +138,3 @@ GOTO menu
 
 :end
 exit
-
