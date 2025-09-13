@@ -86,20 +86,47 @@ echo.
 echo =======================================================
 echo.
 
+REM First, check if this is already a git repository.
+IF EXIST ".git" (
+    echo [ERROR] This folder is already a Git repository.
+    echo You should use the 'Sync' option instead of 'Clone'.
+    echo.
+    pause
+    GOTO menu
+)
+
+REM Check if the directory contains more than just this script.
+set "item_count=0"
+for %%i in (*) do set /a item_count+=1
+for /d %%i in (*) do set /a item_count+=1
+
+REM The script itself counts as 1. If there's more, it's not empty enough.
+if %item_count% GTR 1 (
+    echo [ERROR] This folder is not empty.
+    echo Git can only clone into an empty directory to avoid overwriting files.
+    echo Please run this script in a new folder that contains nothing else.
+    echo.
+    pause
+    GOTO menu
+)
+
+echo This will clone the repository's files into the current folder.
+echo.
+
 REM Set the repository URL directly, removing the need for user input.
 set "repo_url=https://github.com/GitKentC/mcpe-server.git"
 
-echo Cloning the mcpe-server repository...
+echo Cloning the mcpe-server repository into the current directory...
 echo %repo_url%
 echo.
 
-REM Execute the git clone command with the predefined URL.
-git clone %repo_url%
+REM Execute the git clone command, cloning into the current directory (.).
+git clone %repo_url% .
 
 echo.
 echo =======================================================
 echo.
-echo      Repository cloned successfully!
+echo      Repository contents cloned successfully!
 echo.
 echo =======================================================
 echo.
@@ -108,3 +135,4 @@ GOTO menu
 
 :end
 exit
+
